@@ -17,11 +17,11 @@
 package mock_engine
 
 import (
+	statemanager "github.com/aws/amazon-ecs-agent/agent/statemanager"
+	gomock "code.google.com/p/gomock/gomock"
 	engine "github.com/aws/amazon-ecs-agent/agent/engine"
 	go_dockerclient "github.com/fsouza/go-dockerclient"
 	api "github.com/aws/amazon-ecs-agent/agent/api"
-	statemanager "github.com/aws/amazon-ecs-agent/agent/statemanager"
-	gomock "code.google.com/p/gomock/gomock"
 )
 
 // Mock of DockerClient interface
