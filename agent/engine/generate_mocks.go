@@ -12,3 +12,5 @@
 // permissions and limitations under the License.
 
 package engine
+
+//go:generate mockgen.sh github.com/aws/amazon-ecs-agent/agent/engine DockerClient,TaskEngine mocks/mock_engine.go

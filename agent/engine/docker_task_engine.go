@@ -524,6 +524,13 @@ func (engine *DockerTaskEngine) CreateContainer(task *api.Task, container *api.C
 		}
 
 		containerName := "ecs-" + task.Family + "-" + task.Version + "-" + name + "-" + utils.RandHex()
+
+		// Pre-add the container in case we stop before the next, more useful,
+		// AddContainer call. This ensures we have a way to get the container if
+		// we die before 'createContainer' returns because we can inspect by
+		// name
+		engine.state.AddContainer(&api.DockerContainer{DockerName: containerName, Container: container}, task)
+
 		containerId, err := engine.client.CreateContainer(config, containerName)
 		if err != nil {
 			return err
