@@ -110,6 +110,11 @@ func (engine *DockerTaskEngine) Init() error {
 	return nil
 }
 
+// SetDockerClient sets the client implementation to use. This is meant as a testing hook for injecting a mock.
+func (engine *DockerTaskEngine) SetDockerClient(client DockerClient) {
+	engine.client = client
+}
+
 func (engine *DockerTaskEngine) initDockerClient() error {
 	if engine.client == nil {
 		client, err := NewDockerGoClient()
