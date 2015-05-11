@@ -42,7 +42,7 @@ func init() {
 		ecsacs.ServerException{},
 		ecsacs.BadRequestException{}, ecsacs.InvalidClusterException{},
 		ecsacs.InvalidInstanceException{}, ecsacs.AccessDeniedException{},
-		ecsacs.InactiveInstanceException{},
+		ecsacs.InactiveInstanceException{}, ecsacs.ErrorMessage{},
 	}
 
 	// This produces a map of:
