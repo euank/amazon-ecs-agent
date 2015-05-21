@@ -40,7 +40,9 @@ func GetAuthconfig(image string) docker.AuthConfiguration {
 	}
 	authConfig, ok := keyring.Lookup(image)
 	if ok {
+		log.Debug("Loaded auth information for image", "image", image, "user", authConfig.Username)
 		return authConfig
 	}
+	log.Debug("No auth information found for image", "image", image)
 	return docker.AuthConfiguration{}
 }
