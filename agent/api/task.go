@@ -227,6 +227,14 @@ func (task *Task) dockerConfig(container *Container) (*docker.Config, *DockerCli
 			"com.amazonaws.ecs.task-definition-version": task.Version,
 		},
 	}
+
+	if override, ok := container.Environment["_ECS_DOCKER_CONFIG"]; ok {
+		err = json.Unmarshal([]byte(override), config)
+		if err != nil {
+			log.Warn("Error loading custom dockerconfig overrides: " + err.Error())
+		}
+	}
+
 	return config, nil
 }
 
@@ -299,6 +307,12 @@ func (task *Task) dockerHostConfig(container *Container, dockerContainerMap map[
 		Binds:        binds,
 		PortBindings: dockerPortMap,
 		VolumesFrom:  volumesFrom,
+	}
+	if override, ok := container.Environment["_ECS_DOCKER_HOSTCONFIG"]; ok {
+		err = json.Unmarshal([]byte(override), hostConfig)
+		if err != nil {
+			log.Warn("Error loading custom docker hostconfig overrides: " + err.Error())
+		}
 	}
 	return hostConfig, nil
 }
