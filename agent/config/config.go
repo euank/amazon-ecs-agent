@@ -16,6 +16,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -302,4 +303,8 @@ func NewConfig() (config *Config, err error) {
 	}
 
 	return config, err
+}
+
+func (config *Config) String() string {
+	return fmt.Sprintf("Cluster: %v, Region: %v, DataDir: %v, Checkpoint: %v, AuthType: %v, UpdatesEnabled: %v, DisableMetrics: %v, ReservedMem: %v")
 }
