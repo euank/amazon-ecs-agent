@@ -19,12 +19,10 @@
 package wsclient
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -138,9 +136,7 @@ func (cs *ClientServerImpl) Connect() error {
 		dialHost += ":443"
 	}
 
-	timeoutDialer := &net.Dialer{Timeout: wsConnectTimeout}
-	log.Info("Creating poll dialer", "host", parsedURL.Host)
-	wsConn, err := tls.DialWithDialer(timeoutDialer, "tcp", dialHost, &tls.Config{InsecureSkipVerify: cs.AcceptInvalidCert})
+	wsConn, err := websocketConn(dialHost, wsConnectTimeout, cs.AcceptInvalidCert)
 	if err != nil {
 		return err
 	}
