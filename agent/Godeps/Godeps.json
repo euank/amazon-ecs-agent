@@ -136,7 +136,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "169f42267807fe93f4a4b0150583e410aefafe4e"
+			"Rev": "f0cf018861e2b54077eced91659e255072b5f215"
+		},
+		{
+			"ImportPath": "golang.org/x/net/proxy",
+			"Rev": "f0cf018861e2b54077eced91659e255072b5f215"
 		},
 		{
 			"ImportPath": "golang.org/x/tools/go/ast/astutil",
