@@ -109,6 +109,7 @@ func NewECSClient(credentialProvider *credentials.Credentials, config *config.Co
 	if config.APIEndpoint != "" {
 		ecsConfig.Endpoint = &config.APIEndpoint
 	}
+	ecsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody)
 	standardClient := ecs.New(&ecsConfig)
 	submitStateChangeClient := newSubmitStateChangeClient(&ecsConfig)
 	return &ApiECSClient{
