@@ -55,6 +55,7 @@ func init() {
 	if envEndpoint := os.Getenv("ECS_BACKEND_HOST"); envEndpoint != "" {
 		ecsconfig.Endpoint = &envEndpoint
 	}
+	ecsconfig.LogLevel = aws.LogLevel(aws.LogDebugWithRequestRetries)
 
 	ECS = ecs.New(&ecsconfig)
 	Cluster = "ecs-functional-tests"
