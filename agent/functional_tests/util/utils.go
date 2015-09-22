@@ -93,7 +93,7 @@ func GetTaskDefinition(name string) (string, error) {
 	existing, err := ECS.DescribeTaskDefinition(&ecs.DescribeTaskDefinitionInput{
 		TaskDefinition: &idempotentFamily,
 	})
-	if err == nil {
+	if err == nil && os.Getenv("ECS_FORCE_REREGISTER_TD") == "" {
 		return fmt.Sprintf("%s:%d", *existing.TaskDefinition.Family, *existing.TaskDefinition.Revision), nil
 	}
 
