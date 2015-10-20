@@ -24,6 +24,15 @@ gobuild:
 static:
 	./scripts/build
 
+.PHONY: static-debug
+static-debug:
+	./scripts/build true "" -tags="debug"
+
+.PHONY: debug-build
+debug-build: static-debug
+	@docker build -f scripts/dockerfiles/Dockerfile.release -t "amazon/amazon-ecs-agent:debug" .
+	@echo "Built Docker image \"amazon/amazon-ecs-agent:debug\""
+
 # 'golang-base' builds a Go binary patched for CVE-2015-5739, CVE-2015-5740, and CVE-2015-5741
 golang-base:
 	@docker build -f scripts/dockerfiles/Dockerfile.golang -t "amazon/amazon-ecs-agent-build:golang" .

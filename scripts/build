@@ -23,6 +23,7 @@ set -e
 # The second option exists so that if built in a container, the result can be moved to a shared volume mount
 static=${1:-true}
 output_directory=${2:-}
+build_flags=${3:-}
 
 # Normalize to working directory being build root (up one level from ./scripts)
 ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )
@@ -40,9 +41,9 @@ go run gen/version-gen.go
 
 cd "${ROOT}"
 if [[ "${static}" == "true" ]]; then
-	CGO_ENABLED=0 go build -installsuffix cgo -a -ldflags "-s" -o out/amazon-ecs-agent ./agent/
+	CGO_ENABLED=0 go build ${build_flags} -installsuffix cgo -a -ldflags "-s" -o out/amazon-ecs-agent ./agent/
 else
-  go build -o out/amazon-ecs-agent ./agent/
+  go build ${build_flags} -o out/amazon-ecs-agent ./agent/
 fi
 
 if [[ -n "${output_directory}" ]]; then

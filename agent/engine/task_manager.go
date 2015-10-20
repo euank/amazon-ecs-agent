@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	taskStoppedDuration           = 3 * time.Hour
+	taskStoppedDuration           = 1 * time.Minute
 	steadyStateTaskVerifyInterval = 10 * time.Minute
 )
 
