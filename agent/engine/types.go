@@ -35,7 +35,6 @@ type DockerContainerMetadata struct {
 	DockerId     string
 	ExitCode     *int
 	PortBindings []api.PortBinding
-	Error        error
 	Volumes      map[string]string
 }
 
@@ -43,5 +42,4 @@ type DockerContainerMetadata struct {
 // ListContainers call.
 type ListContainersResponse struct {
 	DockerIds []string
-	Error     error
 }

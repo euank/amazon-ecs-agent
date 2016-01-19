@@ -69,18 +69,18 @@ type DockerClient interface {
 	WithVersion(dockerclient.DockerVersion) DockerClient
 	ContainerEvents(ctx context.Context) (<-chan DockerContainerChangeEvent, error)
 
-	PullImage(image string, authData *api.RegistryAuthenticationData) DockerContainerMetadata
-	CreateContainer(*docker.Config, *docker.HostConfig, string) DockerContainerMetadata
-	StartContainer(string) DockerContainerMetadata
-	StopContainer(string) DockerContainerMetadata
-	DescribeContainer(string) (api.ContainerStatus, DockerContainerMetadata)
+	PullImage(image string, authData *api.RegistryAuthenticationData) (DockerContainerMetadata, error)
+	CreateContainer(*docker.Config, *docker.HostConfig, string) (DockerContainerMetadata, error)
+	StartContainer(string) (DockerContainerMetadata, error)
+	StopContainer(string) (DockerContainerMetadata, error)
+	DescribeContainer(string) (api.ContainerStatus, DockerContainerMetadata, error)
 
 	RemoveContainer(string) error
 
 	GetContainerName(string) (string, error)
 	InspectContainer(string) (*docker.Container, error)
 
-	ListContainers(bool) ListContainersResponse
+	ListContainers(bool) (ListContainersResponse, error)
 
 	Version() (string, error)
 }
@@ -160,7 +160,7 @@ func (dg *dockerGoClient) dockerClient() (dockeriface.Client, error) {
 	return dg.clientFactory.GetClient(dg.version)
 }
 
-func (dg *dockerGoClient) PullImage(image string, authData *api.RegistryAuthenticationData) DockerContainerMetadata {
+func (dg *dockerGoClient) PullImage(image string, authData *api.RegistryAuthenticationData) (DockerContainerMetadata, error) {
 	timeout := ttime.After(pullImageTimeout)
 
 	// Workaround for devicemapper bug. See:
@@ -171,18 +171,18 @@ func (dg *dockerGoClient) PullImage(image string, authData *api.RegistryAuthenti
 	response := make(chan DockerContainerMetadata, 1)
 	go func() { response <- dg.pullImage(image, authData) }()
 	select {
-	case resp := <-response:
-		return resp
+	case resp, err := <-response:
+		return resp, err
 	case <-timeout:
-		return DockerContainerMetadata{Error: &DockerTimeoutError{pullImageTimeout, "pulled"}}
+		return DockerContainerMetadata{}, &DockerTimeoutError{pullImageTimeout, "pulled"}
 	}
 }
 
-func (dg *dockerGoClient) pullImage(image string, authData *api.RegistryAuthenticationData) DockerContainerMetadata {
+func (dg *dockerGoClient) pullImage(image string, authData *api.RegistryAuthenticationData) (DockerContainerMetadata, error) {
 	log.Debug("Pulling image", "image", image)
 	client, err := dg.dockerClient()
 	if err != nil {
-		return DockerContainerMetadata{Error: CannotGetDockerClientError{version: dg.version, err: err}}
+		return DockerContainerMetadata{}, CannotGetDockerClientError{version: dg.version, err: err}
 	}
 
 	// Special case; this image is not one that should be pulled, but rather
@@ -190,9 +190,9 @@ func (dg *dockerGoClient) pullImage(image string, authData *api.RegistryAuthenti
 	if image == emptyvolume.Image+":"+emptyvolume.Tag {
 		err := dg.createScratchImageIfNotExists()
 		if err != nil {
-			return DockerContainerMetadata{Error: &api.DefaultNamedError{Name: "CreateEmptyVolumeError", Err: "Could not create empty volume " + err.Error()}}
+			return DockerContainerMetadata{}, &api.DefaultNamedError{Name: "CreateEmptyVolumeError", Err: "Could not create empty volume " + err.Error()}
 		}
-		return DockerContainerMetadata{}
+		return DockerContainerMetadata{}, nil
 	}
 
 	authConfig, err := dg.getAuthdata(image, authData)
@@ -641,28 +641,28 @@ func (dg *dockerGoClient) ContainerEvents(ctx context.Context) (<-chan DockerCon
 }
 
 // ListContainers returns a slice of container IDs.
-func (dg *dockerGoClient) ListContainers(all bool) ListContainersResponse {
+func (dg *dockerGoClient) ListContainers(all bool) (ListContainersResponse, error) {
 	timeout := ttime.After(listContainersTimeout)
 
 	response := make(chan ListContainersResponse, 1)
 	go func() { response <- dg.listContainers(all) }()
 	select {
-	case resp := <-response:
-		return resp
+	case resp, err := <-response:
+		return resp, err
 	case <-timeout:
-		return ListContainersResponse{Error: &DockerTimeoutError{listContainersTimeout, "listing"}}
+		return ListContainersResponse{}, &DockerTimeoutError{listContainersTimeout, "listing"}
 	}
 }
 
-func (dg *dockerGoClient) listContainers(all bool) ListContainersResponse {
+func (dg *dockerGoClient) listContainers(all bool) (ListContainersResponse, error) {
 	client, err := dg.dockerClient()
 	if err != nil {
-		return ListContainersResponse{Error: err}
+		return ListContainersResponse{}, err
 	}
 
 	containers, err := client.ListContainers(docker.ListContainersOptions{All: all})
 	if err != nil {
-		return ListContainersResponse{Error: err}
+		return ListContainersResponse{}, err
 	}
 
 	// We get an empty slice if there are no containers to be listed.
@@ -672,7 +672,7 @@ func (dg *dockerGoClient) listContainers(all bool) ListContainersResponse {
 		containerIDs[i] = container.ID
 	}
 
-	return ListContainersResponse{DockerIds: containerIDs, Error: nil}
+	return ListContainersResponse{DockerIds: containerIDs}, nil
 }
 
 func (dg *dockerGoClient) SupportedVersions() []dockerclient.DockerVersion {
