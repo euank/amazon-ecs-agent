@@ -18,7 +18,6 @@ import (
 	"fmt"
 	mathrand "math/rand"
 	"os"
-	"runtime"
 	"time"
 
 	acshandler "github.com/aws/amazon-ecs-agent/agent/acs/handler"
@@ -44,7 +43,6 @@ import (
 )
 
 func init() {
-	runtime.GOMAXPROCS(1)
 	mathrand.Seed(time.Now().UnixNano())
 }
 
